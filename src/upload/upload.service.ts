@@ -1,4 +1,3 @@
-import type { PutObjectCommandInput } from '@aws-sdk/client-s3';
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import type { OnModuleInit } from '@nestjs/common';
@@ -10,6 +9,7 @@ import type { Model } from 'mongoose';
 
 import { Upload } from './upload.schema';
 import type { UploadFile, UploadQuery } from './upload.type';
+import { pagination, responseSuccess } from 'src/shared/utils/response.util';
 
 @Injectable()
 export class UploadService implements OnModuleInit {
@@ -20,9 +20,15 @@ export class UploadService implements OnModuleInit {
 
   private s3: S3Client;
 
+  private awsBucketName: string;
+  private awsRegion: string;
+
   onModuleInit() {
+    this.awsBucketName = this.configService.get('AWS_BUCKET_NAME') as string;
+    this.awsRegion = this.configService.get('AWS_REGION') as string;
+
     this.s3 = new S3Client({
-      region: this.configService.get('AWS_REGION') as string,
+      region: this.awsRegion,
       credentials: {
         accessKeyId: this.configService.get('AWS_ACCESS_KEY_ID') as string,
         secretAccessKey: this.configService.get(
@@ -36,18 +42,24 @@ export class UploadService implements OnModuleInit {
     const urls = await Promise.all(
       files.map(async ({ custom_name: customName, name }) => {
         const fileKey = `images/${dayjs().format('YYYY-MM-DD')}/${name}`;
+        const fileUrl = `https://${this.awsBucketName}.s3.${this.awsRegion}.amazonaws.com/${fileKey}`;
 
-        const params: PutObjectCommandInput = {
-          Bucket: this.configService.get<string>('AWS_BUCKET_NAME'),
+        const command = new PutObjectCommand({
+          Bucket: this.awsBucketName,
           Key: fileKey,
-        };
+        });
 
-        const command = new PutObjectCommand(params);
-        const url = await getSignedUrl(this.s3, command, { expiresIn: 3600 });
+        const presignedUrl = await getSignedUrl(this.s3, command, {
+          expiresIn: 3600,
+        });
 
-        await this.uploadModel.create({ name: customName, key: fileKey, url });
+        await this.uploadModel.create({
+          name: customName,
+          key: fileKey,
+          url: fileUrl,
+        });
 
-        return { url, key: fileKey };
+        return responseSuccess({ url: presignedUrl, key: fileKey });
       }),
     );
 
@@ -58,7 +70,7 @@ export class UploadService implements OnModuleInit {
     const filter: Record<string, unknown> = {};
 
     const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 10;
+    const limit = Number(query.per_page) || 10;
     const skip = (page - 1) * limit;
 
     if (query.start_date && query.end_date) {
@@ -77,11 +89,14 @@ export class UploadService implements OnModuleInit {
 
     const totalFiles = await this.uploadModel.countDocuments(filter);
 
-    return {
-      data: files,
-      page,
-      total_data: totalFiles,
-      total_pages: Math.ceil(totalFiles / limit),
-    };
+    return responseSuccess({
+      files,
+      pagination: pagination({
+        page,
+        per_page: limit,
+        total_data: totalFiles,
+        total_page: Math.ceil(totalFiles / limit),
+      }),
+    });
   }
 }

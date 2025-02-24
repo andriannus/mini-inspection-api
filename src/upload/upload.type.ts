@@ -4,8 +4,8 @@ export type UploadFile = {
 };
 
 export type UploadQuery = {
-  limit: string;
   end_date?: string;
+  per_page: string;
   start_date?: string;
   page: string;
 };
