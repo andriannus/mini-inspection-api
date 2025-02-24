@@ -59,11 +59,11 @@ export class UploadService implements OnModuleInit {
           url: fileUrl,
         });
 
-        return responseSuccess({ url: presignedUrl, key: fileKey });
+        return presignedUrl;
       }),
     );
 
-    return urls;
+    return responseSuccess(urls);
   }
 
   async getFiles(query: UploadQuery) {
