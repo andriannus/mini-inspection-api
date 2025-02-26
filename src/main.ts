@@ -10,9 +10,16 @@ async function bootstrap() {
     .enableVersioning({
       type: VersioningType.URI,
     })
-    .enableCors();
+    .enableCors({
+      origin: [
+        'http://localhost:3001',
+        'https://mini-inspection-api-28e818633d02.herokuapp.com',
+      ],
+      methods: ['GET', 'POST'],
+      credentials: true,
+    });
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT!);
 }
 
 bootstrap();
