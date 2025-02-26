@@ -2,10 +2,9 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import dbConfig from './shared/config/database.config';
+import dbConfig from 'src/shared/config/database.config';
 
-import { InspectionsModule } from './inspections/inspections.module';
-import { UploadModule } from './upload/upload.module';
+import { UploadModule } from 'src/upload/upload.module';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -16,7 +15,6 @@ import { AppService } from './app.service';
   imports: [
     MongooseModule.forRootAsync(dbConfig.asProvider()),
     ConfigModule.forRoot(),
-    InspectionsModule,
     UploadModule,
   ],
 })

@@ -12,7 +12,12 @@ import { UploadService } from './upload.service';
   providers: [UploadService],
   imports: [
     ConfigModule,
-    MongooseModule.forFeature([{ name: Upload.name, schema: UploadSchema }]),
+    MongooseModule.forFeature([
+      {
+        name: Upload.name,
+        schema: UploadSchema,
+      },
+    ]),
   ],
 })
 export class UploadModule {}

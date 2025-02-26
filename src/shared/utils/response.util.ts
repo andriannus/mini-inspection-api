@@ -1,5 +1,3 @@
-import { Pagination } from '../types/response.type';
-
 export function responseSuccess<T>(data: T) {
   return {
     success: true,
@@ -12,8 +10,4 @@ export function responseError(message: string) {
     success: false,
     message,
   };
-}
-
-export function pagination(pagination: Pagination) {
-  return pagination;
 }

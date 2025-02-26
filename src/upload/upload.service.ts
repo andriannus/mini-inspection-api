@@ -7,9 +7,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import * as dayjs from 'dayjs';
 import type { Model } from 'mongoose';
 
+import { responseSuccess } from 'src/shared/utils/response.util';
+import { Pagination } from 'src/shared/types/response.type';
+
 import { Upload } from './upload.schema';
 import type { UploadFile, UploadQuery } from './upload.type';
-import { pagination, responseSuccess } from 'src/shared/utils/response.util';
 
 @Injectable()
 export class UploadService implements OnModuleInit {
@@ -89,14 +91,14 @@ export class UploadService implements OnModuleInit {
 
     const totalFiles = await this.uploadModel.countDocuments(filter);
 
-    return responseSuccess({
+    return responseSuccess<{ files: typeof files; pagination: Pagination }>({
       files,
-      pagination: pagination({
+      pagination: {
         page,
         per_page: limit,
         total_data: totalFiles,
         total_page: Math.ceil(totalFiles / limit),
-      }),
+      },
     });
   }
 }
