@@ -4,17 +4,11 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
 
-  app
-    .enableVersioning({
-      type: VersioningType.URI,
-    })
-    .enableCors({
-      origin: ['http://localhost:3001'],
-      methods: ['GET', 'POST'],
-      credentials: true,
-    });
+  app.enableVersioning({
+    type: VersioningType.URI,
+  });
 
   await app.listen(process.env.PORT!);
 }
