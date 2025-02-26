@@ -11,10 +11,7 @@ async function bootstrap() {
       type: VersioningType.URI,
     })
     .enableCors({
-      origin: [
-        'http://localhost:3001',
-        'https://mini-inspection-api-28e818633d02.herokuapp.com',
-      ],
+      origin: ['http://localhost:3001'],
       methods: ['GET', 'POST'],
       credentials: true,
     });
